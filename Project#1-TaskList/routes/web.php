@@ -1,144 +1,48 @@
 <?php
 
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
-/*
-class Task
-{
-  public function __construct(
-    public int $id,
-    public string $title,
-    public string $description,
-    public ?string $long_description,
-    public bool $completed,
-    public string $created_at,
-    public string $updated_at
-  ) {
-  }
-}
-
-$tasks = [
-  new Task(
-    1,
-    'Buy groceries',
-    'Task 1 description',
-    'Task 1 long description',
-    false,
-    '2023-03-01 12:00:00',
-    '2023-03-01 12:00:00'
-  ),
-  new Task(
-    2,
-    'Sell old stuff',
-    'Task 2 description',
-    null,
-    false,
-    '2023-03-02 12:00:00',
-    '2023-03-02 12:00:00'
-  ),
-  new Task(
-    3,
-    'Learn programming',
-    'Task 3 description',
-    'Task 3 long description',
-    true,
-    '2023-03-03 12:00:00',
-    '2023-03-03 12:00:00'
-  ),
-  new Task(
-    4,
-    'Take dogs for a walk',
-    'Task 4 description',
-    null,
-    false,
-    '2023-03-04 12:00:00',
-    '2023-03-04 12:00:00'
-  ),
-];
+Route::get('/', function () {
+    $tasks = \App\Models\Task::all(); 
+    return view('view', ['tasks' => $tasks]);
+})->name('home');
 
 
-*/
-
-
-
-
-
-Route::get('/' , function() {
-  return redirect()->route('tasks.index');
-});
-
-
-
-Route::get( '/tasks' , function() {
-  return view( 'index' , [ 'tasks' => \App\models\Task::latest()->where('completed', true)->get() ]);
-})->name('tasks.index');
-
-/* Route::get( '/tasks/{id}' , function($id) use ($tasks) { 
-              // convierte el array en una coleccion, para poder trabajar con principios de POO
-    $task = collect($tasks)->firstWhere('id' , $id);
-    if (!$task) {
-      abort(Response::HTTP_NOT_FOUND);
-    }
-                      // se pasa el array como segundo parametro para poder trabajar con el desde los templates
-    return view('show', ['task' => $task]);
- })->name('tasks.show');
-*/
-
-Route::get('/tasks/{id}' , function($id) {
-  return view ('show' , ['task' => \App\Models\Task::find($id)]);
-})->name('tasks.show');
-
-
-
-
-// basically takes something by URL and return a view, proceeding from a function. // (1)
-// it does via a get method (get the URL and return the view)
-/*Route::get('/', function () use ($tasks){
-    return view('index' , [
-        'tasks' => $tasks
+// remember to use illuminate request
+Route::post('/' , function(Request $request) {
+    $data = $request->validate([
+        'title' => 'required|max:25',
     ]);
-})->name('main'); // we use name to give a name to the route, instead of just using a URL. (1.4)
-*/
 
-// Here we are defining a route that takes a parameter (name) and return a string with the name (1.2)
-Route::get('/greet/{name}', function ($name) {
-    return 'hello ' . $name;
-});
+    $task = new \App\Models\Task;
+    $task->title = $data['title'];
+    $task->save();
+    return redirect()->route('home');
+})->name('tasks.store');
 
-Route::get('/hello', function () {
-    return 'hello, you are on the hello page';
-});
+Route::get('/edit/{id}', function($id) {
+    $task = \App\Models\Task::findOrFail($id);
+    return view('edit', ['task' => $task]);
+})->name('tasks.edit');
 
-// Here we are defining a route that takes by a get method a URL 'xxx' and redirect to the hello page by using the redirect function (1.3)
-Route::get('/xxx' , function() {
-    return redirect('hello');
-});
-// Here we are defining a route that takes by a get method a URL 'hallo' and redirect to the main page by using the redirect function and the route name (1.5)
-Route::get('/hallo' , function() {
-    return redirect()->route('main'); // by using route we can redirect to a route name instead of a URL (1.6)
-});
+Route::put('/{id}' , function($id, Request $request) {
+    $data = $request->validate([
+        'title' => 'required|max:25',
+    ]);
 
-// Here we are using fallback. This will allow us to redirect to a 404 page if the URL is not found or if it doesn't exits (1.7)
+    $task = \App\Models\Task::findOrFail($id);
+    $task->title = $data['title'];
+    $task->save();
+    return redirect()->route('home');
+})->name('tasks.update');
+
+Route::delete('/{task}' , function($task) {
+    $task = \App\Models\Task::findOrFail($task);
+    $task->delete();
+    return redirect()->route('home');
+})->name('tasks.delete');
+
 Route::fallback(function () {
-    return '404';
+    abort(404);
 });
-
-Route::get('index' , function() {
-    return view('index' , [  // here we are returning a view template. This will be located at resources/views(1.8)
-        'name' => 'Nico'   // Here we are creating a new variable called name which stores a string 'Nico' and it is usable by the view template (1.9)
-    ]); 
-});
-
-

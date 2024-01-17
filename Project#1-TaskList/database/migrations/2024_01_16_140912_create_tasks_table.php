@@ -12,13 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
-            $table->id();  // will return a big integer with auto increment used as primary key
-            $table->timestamps(); // will create two columns: created_at and updated_at. 
-
+            $table->id();
+            $table->timestamps();
             $table->string('title');
-            $table->text('description');
-            $table->text('long_description')->nullable();
-            $table->boolean('completed')->default(false);
         });
     }
 
