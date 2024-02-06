@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Attendee;
+use App\Models\Event;
+use Illuminate\Support\Facades\Gate;
+
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -19,8 +23,15 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * Register any authentication / authorization services.
      */
-    public function boot(): void
-    {
-        //
+    /*
+    public function boot(): void {
+        gate::define('update-event' , function($user , Event $event) {
+            return $user->id === $event->user_id;
+        });
+        gate::define('delete-attendee' , function ($user , Event $event , Attendee $attendee) {
+            return $user->id === $event->user_id ||
+                $user->id === $attendee->user_id;
+        });
     }
+    */
 }
